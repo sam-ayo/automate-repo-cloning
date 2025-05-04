@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 import re
+import time
 
 import rumps
 from git import Repo
@@ -22,30 +23,42 @@ NOTIFICATION_MESSAGE = "Repository cloned!"
 CLIPBOARD_COMMAND = ["pbpaste"]
 OSASCRIPT_COMMAND_BASE = ["osascript", "-e"]
 
+# Script to activate our app
+ACTIVATE_APP_SCRIPT = '''
+tell application "System Events" to set frontmost of process "Python" to true
+'''
+
+GET_ACTIVE_BROWSER_SCRIPT = '''
+tell application "System Events"
+    set frontApp to name of first application process whose frontmost is true
+    return frontApp
+end tell
+'''
+
 BROWSER_SCRIPTS = {
-    "Zen": (
-        'tell application "System Events"\\n'
-        '  tell process "Zen"\\n'
-        '    set frontmost to true\\n'
-        '    try\\n'
-        '      -- Preferred path (Firefox-derived UI)\\n'
-        '      return value of attribute "AXValue" of text field 1 of combo box 1 of toolbar "Navigation" of UI element 1 of front window\\n'
-        '    on error\\n'
-        '      try\\n'
-        '        -- Fallback path: first toolbar of the window\\n'
-        '        return value of attribute "AXValue" of text field 1 of combo box 1 of toolbar 1 of front window\\n'
-        '      on error\\n'
-        '        -- Last-chance: keyboard shortcut + clipboard\\n'
-        '        keystroke "l" using {command down}\\n'
-        '        keystroke "c" using {command down}\\n'
-        '        keystroke escape\\n' 
-        '        delay 0.05\\n'
-        '        return the clipboard\\n'
-        '      end try\\n'
-        '    end try\\n'
-        '  end tell\\n'
-        'end tell'
-    ),
+    "zen": '''
+tell application "System Events"
+  tell process "zen"
+    set frontmost to true
+    try
+      -- Preferred path (Firefox-derived UI)
+      return value of attribute "AXValue" of text field 1 of combo box 1 of toolbar "Navigation" of UI element 1 of front window
+    on error
+      try
+        -- Fallback path: first toolbar of the window
+        return value of attribute "AXValue" of text field 1 of combo box 1 of toolbar 1 of front window
+      on error
+        -- Last-chance: keyboard shortcut + clipboard
+        keystroke "l" using {command down}
+        keystroke "c" using {command down}
+        key code 53
+        delay 0.05
+        return the clipboard
+      end try
+    end try
+  end tell
+end tell
+''',
     "Google Chrome": 'tell application "Google Chrome" to get URL of active tab of front window',
     "Safari": 'tell application "Safari" to get URL of front document',
     "Arc": 'tell application "Arc" to get URL of active tab of front window',
@@ -70,6 +83,15 @@ class RepoTrayApp(rumps.App):
         class TmpResponse:
             clicked = False
             text = ""
+            
+        # Ensure our app is at the front before showing the window
+        try:
+            subprocess.run(OSASCRIPT_COMMAND_BASE + [ACTIVATE_APP_SCRIPT], 
+                          check=True, capture_output=True, text=True)
+            # Small delay to ensure the app activation completes
+            time.sleep(0.2)
+        except Exception as e:
+            print(f"Failed to activate app: {e}", flush=True)
 
         response = rumps.Window(
             title=WINDOW_TITLE,
@@ -135,29 +157,44 @@ class RepoTrayApp(rumps.App):
             except Exception:
                 pass
 
+    def get_active_browser(self) -> str | None:
+        try:
+            command = OSASCRIPT_COMMAND_BASE + [GET_ACTIVE_BROWSER_SCRIPT]
+            print("Detecting active browser...", flush=True)
+            active_app = subprocess.check_output(command, text=True, stderr=subprocess.PIPE).strip()
+            
+            # Check if the active app is a browser we support
+            for browser_name in BROWSER_SCRIPTS.keys():
+                if browser_name in active_app:
+                    print(f"Active browser detected: {browser_name}", flush=True)
+                    return browser_name
+            
+            print(f"Active app '{active_app}' is not a supported browser", flush=True)
+            return None
+        except Exception as e:
+            print(f"Error detecting active browser: {e}", flush=True)
+            return None
 
     def detect_github_url(self) -> str | None:
         pattern = GITHUB_URL_PATTERN
-
-        for app, script in BROWSER_SCRIPTS.items():
+        
+        # First try to get URL from active browser
+        active_browser = self.get_active_browser()
+        if active_browser and active_browser in BROWSER_SCRIPTS:
             try:
+                script = BROWSER_SCRIPTS[active_browser]
                 command = OSASCRIPT_COMMAND_BASE + [script]
-                print(f"Trying to get URL from {app}...", flush=True)
+                print(f"Getting URL from active browser {active_browser}...", flush=True)
                 url = subprocess.check_output(command, text=True, stderr=subprocess.PIPE).strip()
                 if pattern.match(url):
-                    print(f"Found URL in {app}: {url}", flush=True)
+                    print(f"Found URL in {active_browser}: {url}", flush=True)
                     return url
                 else:
-                    print(f"URL from {app} ({url}) did not match pattern.", flush=True)
+                    print(f"URL from {active_browser} ({url}) did not match pattern.", flush=True)
             except subprocess.CalledProcessError as e:
-                 print(f"Failed to get URL from {app}: {e.stderr}", flush=True)
-                 continue # Try next browser
-            except FileNotFoundError:
-                 print("osascript command not found. Make sure it's in the PATH.", flush=True)
-                 return None # Cannot proceed without osascript
+                print(f"Failed to get URL from {active_browser}: {e.stderr}", flush=True)
             except Exception as e:
-                 print(f"An unexpected error occurred while checking {app}: {e}", flush=True)
-                 continue # Try next browser
+                print(f"An unexpected error occurred with {active_browser}: {e}", flush=True)
 
         try:
             print("Trying clipboard fallback...", flush=True)
