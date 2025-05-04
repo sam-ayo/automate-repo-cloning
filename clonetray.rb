@@ -21,6 +21,8 @@ class Clonetray < Formula
       s.gsub!(/PLIST_LABEL=.*/, "PLIST_LABEL=\"#{plist_name}\"")
       s.gsub!(/LABEL=\".*\"/, "LABEL=\"#{plist_name}\"")
     end
+
+    (prefix/"#{plist_name}.plist").write plist
   end
 
   def plist_name
