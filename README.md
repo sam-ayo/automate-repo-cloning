@@ -1,64 +1,25 @@
 # CloneTray
 
-CloneTray is a macOS menu bar application that provides a quick way to clone Git repositories. It attempts to automatically detect a GitHub URL from your active web browser or clipboard, prompts for confirmation, clones the repository into `~/Desktop/playground/` (avoiding name collisions), and then opens the cloned directory in the Cursor IDE.
+A macOS menu bar application that automatically clones Git repositories.
 
-## Installation (via Homebrew)
+## Installation
 
-1. **Tap the Repository:**
-    Add the custom Homebrew tap which contains the CloneTray formula:
+1. Clone the repo
+2. Open Terminal and navigate to the extracted directory
+3. Make the launch script executable:
 
-    ```bash
-    brew tap sam-ayo/clonetray
-    ```
+   ```bash
+   chmod +x launchd.sh
+   ```
 
-2. **Install CloneTray:**
-    Install the tool using Homebrew:
+4. To start the application:
 
-    ```bash
-    brew install clonetray
-    ```
+   ```bash
+   ./launchd.sh start
+   ```
 
-    This will install the necessary scripts and dependencies.
+5. To stop the application:
 
-## Usage
-
-CloneTray runs as a background service managed by `launchd` via Homebrew services.
-
-* **Start the Service:**
-
-    ```bash
-    brew services start clonetray
-    ```
-
-    This will start the service immediately and configure it to launch automatically on login.
-
-* **Stop the Service:**
-
-    ```bash
-    brew services stop clonetray
-    ```
-
-    This will stop the service and prevent it from launching automatically on login.
-
-* **Restart the Service:**
-
-    ```bash
-    brew services restart clonetray
-    ```
-
-* **Check Service Status:**
-
-    ```bash
-    brew services list
-    ```
-
-    Look for `clonetray` in the list to see if it's `started` or `stopped`.
-
-* **Check Logs:**
-    Logs are stored in the standard Homebrew log directory:
-  * Standard Output: `/opt/homebrew/var/log/clonetray.stdout.log`
-  * Standard Error: `/opt/homebrew/var/log/clonetray.stderr.log`
-
-## Contributing
-
-Feel free to create a PR to contribute.
+   ```bash
+   ./launchd.sh stop
+   ```
