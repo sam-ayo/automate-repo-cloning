@@ -2,6 +2,7 @@ import subprocess
 from pathlib import Path
 import re
 import time
+import yaml
 
 import rumps
 from git import Repo
@@ -9,8 +10,23 @@ from git import Repo
 APP_NAME = "CloneRepo"
 ICON_FILE = None
 MENU_ITEM_CLONE = "Clone Repo..."
-DEFAULT_CLONE_BASE_DIR = Path.home() / "Desktop" / "playground"
-IDE_APP_NAME = "Cursor"
+
+# Load configuration from config.yml
+CONFIG_FILE = Path(__file__).parent / "config.yml"
+
+def load_config():
+    try:
+        with open(CONFIG_FILE, 'r') as file:
+            config = yaml.safe_load(file)
+            return config
+    except Exception as e:
+        print(f"Error loading config file: {e}", flush=True)
+        return {}
+
+config = load_config()
+DEFAULT_CLONE_BASE_DIR = Path(config.get('default_clone_base_dir', '~/Developer').replace('~', str(Path.home())))
+IDE_APP_NAME = config.get('ide_app_name', 'Cursor')
+
 IDE_OPEN_COMMAND_TEMPLATE = 'open -a "{app_name}" "{directory}"'
 
 GITHUB_URL_PATTERN = re.compile(r"https?://github\.com/[^/]+/[^/\s]+")
