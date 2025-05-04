@@ -30,7 +30,7 @@ CloneTray can be configured via the `config.yml` file:
 
 ```yaml
 default_clone_base_dir: ~/Developer
-ide_app_name: Cursor
+ide_app_name: Cursor # Visual Studio Code
 ```
 
 Modify these values according to your preferences before starting the application.
