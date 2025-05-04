@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.clonetray</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/env</string>
+        <string>python3</string>
+        <string>tray_clone.py</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/com.user.clonetray.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.user.clonetray.stderr.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>__WORKING_DIRECTORY__</string> <!-- Placeholder -->
+
+    <!-- Ensure PATH includes directories for git and osascript if needed -->
+    <!-- The default PATH might be sufficient, but adjust if necessary -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin</string>
+        <!-- Consider making this more dynamic or removing if default PATH is okay -->
+    </dict>
+</dict>
+</plist> 
