@@ -10,17 +10,17 @@ class Clonetray < Formula
   def install
     libexec.install "tray_clone.py"
 
-    bin.install "launchd.sh" => "clonetrayctl"
+    # bin.install "launchd.sh" => "clonetrayctl"
 
-    inreplace bin/"clonetrayctl" do |s|
-      s.gsub!(/^create_plist\(\) \{.*?^\}/m, "")
-      s.gsub!(/^# Check if plist exists.*create_plist/m, "")
-      s.gsub!(/^# Verify plist integrity.*?^fi$/m, "")
+    # inreplace bin/"clonetrayctl" do |s|
+    #   s.gsub!(/^create_plist\(\) \{.*?^\}/m, "")
+    #   s.gsub!(/^# Check if plist exists.*create_plist/m, "")
+    #   s.gsub!(/^# Verify plist integrity.*?^fi$/m, "")
 
-      s.gsub!(/PLIST_PATH=.*/, "PLIST_PATH=\"$HOME/Library/LaunchAgents/#{plist_name}.plist\"")
-      s.gsub!(/PLIST_LABEL=.*/, "PLIST_LABEL=\"#{plist_name}\"")
-      s.gsub!(/LABEL=\".*\"/, "LABEL=\"#{plist_name}\"")
-    end
+    #   s.gsub!(/PLIST_PATH=.*/, "PLIST_PATH=\"$HOME/Library/LaunchAgents/#{plist_name}.plist\"") # This line would fail anyway
+    #   s.gsub!(/PLIST_LABEL=.*/, "PLIST_LABEL=\"#{plist_name}\"") # This line would fail anyway
+    #   s.gsub!(/LABEL=\".*\"/, "LABEL=\"#{plist_name}\"") # This line would fail anyway
+    # end
 
     # (prefix/"#{plist_name}.plist").write plist # Remove this line
   end
@@ -35,8 +35,8 @@ class Clonetray < Formula
     environment_variables PATH: std_service_path_env(Formula["python@3.11"].opt_bin)
   end
 
-  test do
-    assert_predicate bin/"clonetrayctl", :exist?
-    assert_predicate bin/"clonetrayctl", :executable?
-  end
+  # test do
+  #   assert_predicate bin/"clonetrayctl", :exist? # Remove test for clonetrayctl
+  #   assert_predicate bin/"clonetrayctl", :executable? # Remove test for clonetrayctl
+  # end
 end 
