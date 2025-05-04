@@ -22,7 +22,8 @@ class Clonetray < Formula
       s.gsub!(/^# Verify plist integrity.*?^fi$/m, "") # Remove verification block
 
       # Ensure PLIST_PATH and LABEL are correctly defined for the service
-      s.gsub!(/PLIST_PATH=.*/, "PLIST_PATH=\"#{plist_path}\"")
+      # Use the standard LaunchAgents path, constructed from plist_name
+      s.gsub!(/PLIST_PATH=.*/, "PLIST_PATH=\"$HOME/Library/LaunchAgents/#{plist_name}.plist\"")
       s.gsub!(/PLIST_LABEL=.*/, "PLIST_LABEL=\"#{plist_name}\"") # Use plist_name from Homebrew
       s.gsub!(/LABEL=\".*\"/, "LABEL=\"#{plist_name}\"") # Ensure LABEL uses plist_name
     end
