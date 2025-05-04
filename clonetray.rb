@@ -10,33 +10,65 @@ class Clonetray < Formula
   def install
     libexec.install "tray_clone.py"
 
-    # bin.install "launchd.sh" => "clonetrayctl"
+    bin.install "launchd.sh" => "clonetrayctl"
 
-    # inreplace bin/"clonetrayctl" do |s|
-    #   s.gsub!(/^create_plist\(\) \{.*?^\}/m, "")
-    #   s.gsub!(/^# Check if plist exists.*create_plist/m, "")
-    #   s.gsub!(/^# Verify plist integrity.*?^fi$/m, "")
+    inreplace bin/"clonetrayctl" do |s|
+      s.gsub!(/^create_plist\(\) \{.*?^\}/m, "")
+      s.gsub!(/^# Check if plist exists.*create_plist/m, "")
+      s.gsub!(/^# Verify plist integrity.*?^fi$/m, "")
 
-    #   s.gsub!(/PLIST_PATH=.*/, "PLIST_PATH=\"$HOME/Library/LaunchAgents/#{plist_name}.plist\"") # This line would fail anyway
-    #   s.gsub!(/PLIST_LABEL=.*/, "PLIST_LABEL=\"#{plist_name}\"") # This line would fail anyway
-    #   s.gsub!(/LABEL=\".*\"/, "LABEL=\"#{plist_name}\"") # This line would fail anyway
-    # end
-
-    # (prefix/"#{plist_name}.plist").write plist # Remove this line
+      s.gsub!(/PLIST_PATH=.*/, "PLIST_PATH=\"$HOME/Library/LaunchAgents/#{plist_name}.plist\"")
+      s.gsub!(/PLIST_LABEL=.*/, "PLIST_LABEL=\"#{plist_name}\"")
+      s.gsub!(/LABEL=\".*\"/, "LABEL=\"#{plist_name}\"")
+    end
   end
 
-  service do
-    run [Formula["python@3.11"].opt_bin/"python3", opt_libexec/"tray_clone.py"]
-    keep_alive true
-    run_at_load true
-    working_dir opt_libexec
-    log_path var/"log/clonetray.log"
-    error_log_path var/"log/clonetray.log"
-    environment_variables PATH: "#{std_service_path_env}:#{Formula["python@3.11"].opt_bin}"
+  def plist_name
+    "com.user.clonetray"
   end
 
-  # test do
-  #   assert_predicate bin/"clonetrayctl", :exist? # Remove test for clonetrayctl
-  #   assert_predicate bin/"clonetrayctl", :executable? # Remove test for clonetrayctl
-  # end
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+
+          <key>ProgramArguments</key>
+          <array>
+              <string>#{Formula["python@3.11"].opt_bin}/python3</string>
+              <string>#{opt_libexec}/tray_clone.py</string>
+          </array>
+
+          <key>RunAtLoad</key>
+          <true/>
+
+          <key>KeepAlive</key>
+          <true/>
+
+          <key>StandardOutPath</key>
+          <string>#{var}/log/clonetray.stdout.log</string>
+
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/clonetray.stderr.log</string>
+
+          <key>WorkingDirectory</key>
+          <string>#{opt_libexec}</string>
+
+          <key>EnvironmentVariables</key>
+          <dict>
+              <key>PATH</key>
+              <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:#{Formula["python@3.11"].opt_bin}</string>
+          </dict>
+      </dict>
+      </plist>
+    EOS
+  end
+
+  test do
+    assert_predicate bin/"clonetrayctl", :exist?
+    assert_predicate bin/"clonetrayctl", :executable?
+  end
 end 
