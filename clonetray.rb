@@ -1,9 +1,9 @@
 class Clonetray < Formula
   desc "Manages the clonetray background service"
-  homepage "https://github.com/yourusername/automate-repo-cloning" # Optional: Replace with your repo URL
-  url "file:///Users/samueladeoye/Desktop/playground/automate-repo-cloning" # Placeholder for local testing
+  homepage "https://github.com/sam-ayo/automate-repo-cloning" # Optional: Replace with your repo URL
+  url "https://github.com/sam-ayo/automate-repo-cloning/archive/refs/tags/v0.1.0.tar.gz" # Placeholder for local testing
   version "0.1.0" # Start with an initial version
-  # sha256 "" # Add SHA256 checksum if distributing a tarball
+  sha256 "27359705daaf4700996b05c5f780ca3edbb5dee6a305eeee5f59e7c48479e665" # Add SHA256 checksum if distributing a tarball
 
   depends_on "python@3.11" # Or adjust to your Python version if different
 
