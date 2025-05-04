@@ -23,3 +23,14 @@ A macOS menu bar application that automatically clones Git repositories.
    ```bash
    ./launchd.sh stop
    ```
+
+## Configuration
+
+CloneTray can be configured via the `config.yml` file:
+
+```yaml
+default_clone_base_dir: ~/Developer
+ide_app_name: Cursor
+```
+
+Modify these values according to your preferences before starting the application.
