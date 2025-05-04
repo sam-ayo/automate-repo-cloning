@@ -32,7 +32,7 @@ class Clonetray < Formula
     working_dir opt_libexec
     log_path var/"log/clonetray.log"
     error_log_path var/"log/clonetray.log"
-    environment_variables PATH: std_service_path_env(Formula["python@3.11"].opt_bin)
+    environment_variables PATH: "#{std_service_path_env}:#{Formula["python@3.11"].opt_bin}"
   end
 
   # test do
