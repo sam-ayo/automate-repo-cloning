@@ -1,6 +1,6 @@
 # CloneTray
 
-A macOS menu bar application that automatically clones Git repositories.
+A macOS menu bar application that automatically clones Git repositories and opens up in IDE
 
 ## Installation
 
